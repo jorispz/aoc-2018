@@ -5,6 +5,7 @@ object Puzzles {
     private val puzzles = mapOf(
         Puzzle(1) to p01,
         Puzzle(2) to p02,
+        Puzzle(4) to p04,
         Puzzle(17) to p17
     )
 
