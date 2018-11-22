@@ -23,6 +23,7 @@ kotlin {
             compilations.main.outputKinds('EXECUTABLE')
             // Change to specify fully qualified name of your application's entry point:
             compilations.main.entryPoint = 'main'
+//            compilations.main.linkerOpts '-Wl,--subsystem,windows'
         }
 
         configure([js]) {

@@ -8,7 +8,6 @@ val p17 = fun() {
         Insert(pos, step++)
     }
 
-
     val seq = inserts()
 
     val stack = mutableListOf(listOf(0))
