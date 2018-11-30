@@ -3,10 +3,7 @@ data class Puzzle(val day: Int, val part: Int? = null)
 object Puzzles {
 
     private val puzzles = mapOf(
-        Puzzle(1) to p01,
-        Puzzle(2) to p02,
-        Puzzle(4) to p04,
-        Puzzle(17) to p17
+        Puzzle(1) to p01
     )
 
     fun run(day: Int, part: Int? = null) {
@@ -16,6 +13,7 @@ object Puzzles {
 }
 
 fun main(args: Array<String>) {
+
     val (repeat, day, part) = parseArgs(args)
     val times = (1..repeat).map {
         measureNanos {
