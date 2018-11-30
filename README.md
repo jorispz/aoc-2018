@@ -1,7 +1,7 @@
 # Advent of Code 2018 in Multi-Platform Kotlin
 
 ## Intro
-In 2018, I will be participating in the [Advent of Code](https://adventofcode.com) using [Kotlin multi-platform](https://kotlinlang.org/docs/reference/multiplatform.html) code only. This means I can run my solutions on the JVM, on Node JS and running natively on Windows through MinGW.
+In 2018, I will be participating in the [Advent of Code](https://adventofcode.com) using [Kotlin multi-platform](https://kotlinlang.org/docs/reference/multiplatform.html) code only. This means I can run my solutions on the JVM, on Node JS and natively on Windows through MinGW.
 
 I will be measuring the performance of each platform by measuring the elapsed time calculating the solution `N` times:
 ```kotlin
@@ -22,17 +22,12 @@ expect inline fun measureNanos(block: () -> Unit): Long
 
 Each platform provides an actual implementation in files called `Actuals.kt`. On the JVM and native, we can use `measureNanoTime` as provided by the Kotlin standard library on these platforms:
 
-JVM
+JVM and Native:
 ```kotlin
 actual inline fun measureNanos(block: () -> Unit) = measureNanoTime(block)
 ```
 
-Native
-```kotlin
-actual inline fun measureNanos(block: () -> Unit) = measureNanoTime(block)
-```
-
-On Node, we need to use some Node-specific code to achieve the same thing:
+On Node, we need to write our own implementation:
 ```kotlin
 actual inline fun measureNanos(block: () -> Unit): Long {
     val start = process.hrtime()
