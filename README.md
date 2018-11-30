@@ -37,7 +37,7 @@ actual inline fun measureNanos(block: () -> Unit): Long {
     return nanos.roundToLong()
 }
 ```
-
+**NB** All measurements were taken on my laptop, under non-controlled circumstances using non-optmized code and tools. If you use the results below for anything important, you're insane...
 
 # Day 01
 ```
