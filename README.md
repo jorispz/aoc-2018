@@ -37,7 +37,12 @@ actual inline fun measureNanos(block: () -> Unit): Long {
     return nanos.roundToLong()
 }
 ```
+
+Usually, I try to finish a puzzle as quick as possible, then spend some time to cleanup and optimise the code. If and when these optimizations alter the performance, I'll update the measurements below to reflect the new solution.
+
 **NB** All measurements were taken on my laptop, under non-controlled circumstances using non-optmized code and tools. If you use the results below for anything important, you're insane...
+
+
 
 # Day 01
 The answer to today's challenge show quite a dramatic difference in performance between the platforms, with native an order of magnitude slower than JVM and JS. The table below shows the duration of the calculation in `ms`.
@@ -46,9 +51,9 @@ It's clear to see JVM's just-in-time compiler do its magic, with duration droppi
  
 
 ```
-JVM     97,  18,  52,  11,  39,  16,  29,  14,  27,  14,  12,  13,  15,  49,  15,  14,  16,  16,  53,  11,  11,  11,  12,  10,  12
-JS     102,  83,  61,  83,  71,  65,  62,  53,  81,  45,  71,  82,  87,  57,  46, 108,  59,  70,  49,  56, 147,  58,  51,  95,  75 
-MinGW  447, 435, 447, 420, 390, 408, 452, 419, 426, 395, 403, 453, 406, 407, 437, 407, 439, 426, 380, 415, 397, 432, 394, 460, 442 
+JVM    101,  18,  44,  10,  27,  12,  23,  10,  27,  10,  10,  10,  12,  53,  12,  14,  19,  14,  44,  13,  10,  11,  13,  15,  16
+JS     107,  59,  50,  65,  79,  58,  60,  79,  46,  59,  79,  68,  45,  58, 104,  74,  72,  90,  91,  65,  57,  76,  55,  74, 115 
+MinGW  413, 362, 362, 368, 360, 359, 362, 362, 370, 363, 384, 405, 369, 380, 382, 379, 472, 365, 362, 382, 386, 364, 362, 364, 371 
 ```
 
 My first solution to the second part of the puzzle used a `List` instead of a `Set` to keep track of frequencies. This turned out to be dramatically slower, with each iteration taking 15+ seconds on the JVM.
