@@ -38,9 +38,9 @@ actual inline fun measureNanos(block: () -> Unit): Long {
 }
 ```
 
-Usually, I try to finish a puzzle as quick as possible, then spend some time to cleanup and optimise the code. If and when these optimizations alter the performance, I'll update the measurements below to reflect the new solution.
+Usually, I try to finish a puzzle as quickly as possible, then spend some time to cleanup and optimise the code. If and when these optimizations alter the performance, I'll update the measurements below to reflect the new solution.
 
-**NB** All measurements were taken on my laptop, under non-controlled circumstances using non-optmized code and tools. If you use the results below for anything important, you're insane...
+**NB** All measurements were taken on my laptop, under non-controlled circumstances using non-optimized code and tools. If you use the results below for anything important, you're insane...
 
 
 
