@@ -40,8 +40,12 @@ actual inline fun measureNanos(block: () -> Unit): Long {
 **NB** All measurements were taken on my laptop, under non-controlled circumstances using non-optmized code and tools. If you use the results below for anything important, you're insane...
 
 # Day 01
+The answer to today's challenge show quite a dramatic difference in performance between the platforms, with native an order of magnitude slower than JVM and JS.
+
+It's clear to see JVM's just-in-time compiler do its magic, with duration dropping rapidly after the first iteration. 
+
 ```
-JVM        
-JS          
-MinGW       
+JVM     97,  18,  52,  11,  39,  16,  29,  14,  27,  14,  12,  13,  15,  49,  15,  14,  16,  16,  53,  11,  11,  11,  12,  10,  12
+JS     102,  83,  61,  83,  71,  65,  62,  53,  81,  45,  71,  82,  87,  57,  46, 108,  59,  70,  49,  56, 147,  58,  51,  95,  75 
+MinGW  447, 435, 447, 420, 390, 408, 452, 419, 426, 395, 403, 453, 406, 407, 437, 407, 439, 426, 380, 415, 397, 432, 394, 460, 442 
 ```
