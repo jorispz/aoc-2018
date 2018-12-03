@@ -1,6 +1,27 @@
 val p02 = fun() {
-    val input =
-        """mphcuiszrnjzxwkbgdzqeoyxfa
+
+    val boxIDs = input_2.lines().asSequence()
+    val twos = boxIDs.count {
+        it.letterMap().containsValue(2)
+    }
+    val threes = boxIDs.count {
+        it.letterMap().containsValue(3)
+    }
+    println("Checksum: ${twos * threes}")
+
+    measureNanos {
+        boxIDs.mapIndexed { i, l ->
+            boxIDs.drop(i + 1).filter { l.common(it) == l.count() - 1 }
+        }.flatten().single().print { "Box ID: $it" }
+    }.print()
+
+}
+
+fun String.letterMap() = this.groupingBy { it }.eachCount()
+
+fun String.common(other: String) = this.zip(other).filter { it.first == it.second }.count()
+
+val input_2 = """mphcuiszrnjzxwkbgdzqeoyxfa
 mihcuisgrnjzxwkbgdtqeoylia
 mphauisvrnjgxwkbgdtqeiylfa
 mphcuisnrnjzxwkbgdgqeoylua
@@ -250,22 +271,3 @@ mphcuisprnjwxwtbgdtqeoylfa
 mphcuissrnjzxqkbgdtqeoymfa
 mphcuiabrnjzxokbgdtqeoylfa
 mphcuisvrnczxwkbgmtpeoylfa"""
-
-    val boxIDs = input.lines().asSequence()
-    val twos = boxIDs.count {
-        it.letterMap().containsValue(2)
-    }
-    val threes = boxIDs.count {
-        it.letterMap().containsValue(3)
-    }
-    println("Checksum: ${twos * threes}")
-
-    boxIDs.mapIndexed { i, l ->
-        boxIDs.drop(i + 1).filter { l.common(it) == l.count() - 1 }
-    }.flatten().single().print { "Box ID: $it" }
-
-}
-
-fun String.letterMap() = this.groupingBy { it }.eachCount()
-
-fun String.common(other: String) = this.zip(other).filter { it.first == it.second }.count()
