@@ -3,7 +3,6 @@ plugins {
 }
 repositories {
     mavenCentral()
-    maven { url "https://dl.bintray.com/soywiz/soywiz" }
 }
 group 'com.example'
 version '0.0.1'
@@ -37,7 +36,6 @@ kotlin {
         commonMain {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-common'
-                implementation 'com.soywiz:klock:1.0.0'
             }
         }
         commonTest {
@@ -49,7 +47,6 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
-                implementation 'com.soywiz:klock-jvm:1.0.0'
             }
         }
         jvmTest {
@@ -61,7 +58,6 @@ kotlin {
         jsMain {
             dependencies {
                 implementation 'org.jetbrains.kotlin:kotlin-stdlib-js'
-                implementation 'com.soywiz:klock-js:1.0.0'
 
             }
         }
@@ -72,7 +68,6 @@ kotlin {
         }
         mingwMain {
             dependencies {
-                implementation 'com.soywiz:klock-mingwx64:1.0.0'
             }
         }
         mingwTest {

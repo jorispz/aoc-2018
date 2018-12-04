@@ -1,6 +1,3 @@
-import com.soywiz.klock.DateFormat
-
-val dateFormat = DateFormat("yyyy-MM-dd HH:mm")
 /*
 Part 1: guard 1571, minute 54, answer: 84834
 Part 2: guard 1619, minute 33, answer: 53427
