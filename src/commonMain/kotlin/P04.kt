@@ -1,4 +1,4 @@
-import com.soywiz.klock.*
+import com.soywiz.klock.DateFormat
 
 val dateFormat = DateFormat("yyyy-MM-dd HH:mm")
 /*
@@ -6,71 +6,53 @@ Part 1: guard 1571, minute 54, answer: 84834
 Part 2: guard 1619, minute 33, answer: 53427
  */
 val p04 = fun() {
-    val pattern = Regex("""\[(.*)\] (falls asleep|wakes up|Guard #(\d*) begins shift)""")
-    val events = input_4.lines().map { line ->
-        val (time, event, guardID) = pattern.matchEntire(line)!!.groupValues.drop(1)
-        val timeStamp = dateFormat.parse(time).local
-        when (event.split(" ").first()) {
-            "Guard" -> Event(timeStamp, EventType.BEGINS_SHIFT, guardID.toInt())
-            "falls" -> Event(timeStamp, EventType.FALLS_ASLEEP)
-            "wakes" -> Event(timeStamp, EventType.WAKES_UP)
-            else -> throw IllegalArgumentException()
-        }
-
-    }.sortedBy { it.timestamp }
-
-    val minuteSequence = sequence {
-        val start = events[0].timestamp
-        val end = events.last().timestamp.plus(1.hours)
-        val steps = (end - start).minutes.toInt()
-        (0 until steps).forEach {
-            val next = start.plus(it.minutes)
-            if (next.hours == 0 || next.hours == 23) {
-                yield(start.plus(it.minutes))
+    val pattern = Regex("""\[.*:(\d\d)] (falls asleep|wakes up|Guard #(\d*) begins shift)""")
+    val events = input_4.lines()
+        .sorted()
+        .map { line ->
+            val (minutes, event, guardID) = pattern.matchEntire(line)!!.groupValues.drop(1)
+            when (event.first()) {
+                'G' -> Event(minutes.toInt(), EventType.BEGINS_SHIFT, guardID.toInt())
+                'f' -> Event(minutes.toInt(), EventType.FALLS_ASLEEP, -1)
+                else -> Event(minutes.toInt(), EventType.WAKES_UP, -1)
             }
         }
 
-    }
-
-    var guardID: Int = -1
-    var guardAsleep = false
-    val minutesAsleep = mutableListOf<Pair<Int, Int>>()
-
-    minuteSequence.forEach { timestamp ->
-        events.find { it.timestamp == timestamp }?.let {
-            when (it.type) {
+    val sleepMinutes = sequence {
+        var currentGuardID = -1
+        var asleepSince = -1
+        for (event in events) {
+            when (event.type) {
                 EventType.BEGINS_SHIFT -> {
-                    guardID = it.guardID!!
-                    guardAsleep = false
+                    currentGuardID = event.guardID
                 }
                 EventType.FALLS_ASLEEP -> {
-                    guardAsleep = true
+                    asleepSince = event.minutes
                 }
                 EventType.WAKES_UP -> {
-                    guardAsleep = false
+                    yieldAll((asleepSince until event.minutes).map { Pair(currentGuardID, it) })
                 }
             }
         }
-
-        if (timestamp.hours == 1) {
-            guardID = -1
-            guardAsleep = false
-        }
-
-        if (timestamp.hours < 1 && guardAsleep) {
-            minutesAsleep.add(Pair(guardID, timestamp.minutes))
-        }
     }
 
-    val chosenGuard1 = minutesAsleep.groupingBy { it.first }.eachCount().maxBy { it.value }!!.key
-    val chosenMinute1 =
-        minutesAsleep.filter { it.first == chosenGuard1 }.map { it.second }.groupingBy { it }.eachCount().maxBy { it.value }!!.key
+    val guard1 = sleepMinutes
+        .groupingBy { it.first }
+        .eachCount()
+        .maxBy { it.value }!!
+        .key
 
-    println("Part 1: guard ${chosenGuard1}, minute ${chosenMinute1}, answer: ${chosenGuard1 * chosenMinute1}")
+    val minute1 = sleepMinutes
+        .filter { it.first == guard1 }
+        .map { it.second }
+        .groupingBy { it }
+        .eachCount()
+        .maxBy { it.value }!!.key
 
-    val (chosenGuard2, chosenMinute2) = minutesAsleep.groupingBy { it }.eachCount().maxBy { it.value }!!.key
-    println("Part 2: guard ${chosenGuard2}, minute ${chosenMinute2}, answer: ${chosenGuard2 * chosenMinute2}")
+    println("Part 1: guard $guard1, minute $minute1, answer: ${guard1 * minute1}")
 
+    val (guard2, minute2) = sleepMinutes.groupingBy { it }.eachCount().maxBy { it.value }!!.key
+    println("Part 2: guard $guard2, minute $minute2, answer: ${guard2 * minute2}")
 
 }
 
@@ -82,9 +64,9 @@ enum class EventType {
 }
 
 data class Event(
-    val timestamp: DateTime,
+    val minutes: Int,
     val type: EventType,
-    val guardID: Int? = null
+    val guardID: Int
 )
 
 val input_4_test = """[1518-11-01 00:00] Guard #10 begins shift
