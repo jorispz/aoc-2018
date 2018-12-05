@@ -6,7 +6,8 @@ object Puzzles {
         Puzzle(1) to p01,
         Puzzle(2) to p02,
         Puzzle(3) to p03,
-        Puzzle(4) to p04
+        Puzzle(4) to p04,
+        Puzzle(5) to p05
     )
 
     fun run(day: Int, part: Int? = null) {

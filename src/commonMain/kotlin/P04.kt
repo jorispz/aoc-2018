@@ -46,13 +46,13 @@ val p04 = fun() {
         .eachCount()
         .maxBy { it.value }!!.key
 
+
     println("Part 1: guard $guard1, minute $minute1, answer: ${guard1 * minute1}")
 
     val (guard2, minute2) = sleepMinutes.groupingBy { it }.eachCount().maxBy { it.value }!!.key
     println("Part 2: guard $guard2, minute $minute2, answer: ${guard2 * minute2}")
 
 }
-
 
 enum class EventType {
     BEGINS_SHIFT,
