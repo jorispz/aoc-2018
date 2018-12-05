@@ -2,10 +2,11 @@
 //Minimum length: 4956
 val p05 = fun() {
 
-    input_5.reduce().count().print { "Length after reducing input: $it" }
+    val firstPolymer = input_5.reduce()
+    firstPolymer.count().print { "Length after reducing input: $it" }
 
     ('a'..'z').map { unit ->
-        input_5.reduce(unit).count()
+        firstPolymer.reduce(unit).count()
     }.min().print { "Minimum length after removing problem units: $it" }
 
 }
