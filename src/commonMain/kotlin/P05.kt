@@ -4,16 +4,17 @@ val p05 = fun() {
 
     input_5.reduce().count().print { "Length after reducing input: $it" }
 
-    "abcdefghijklmnopqrstuvwxyz".map { unit ->
-        input_5.replace(unit.toString(), "", true).reduce().count()
+    ('a'..'z').map { unit ->
+        input_5.reduce(unit).count()
     }.min().print { "Minimum length after removing problem units: $it" }
 
 }
 
-fun String.reduce(): String {
+fun String.reduce(ignore: Char? = null): String {
     return mutableListOf<Char>().apply {
         this@reduce.forEach { char ->
             when {
+                char.toLowerCase() == ignore -> Unit
                 isEmpty() -> add(char)
                 char.implodes(last()) -> removeAt(size - 1)
                 else -> add(char)
