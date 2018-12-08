@@ -1,47 +1,41 @@
+// 1: PFKQWJSVUXEMNIHGTYDOZACRLB
+// 2: 864
 val p07 = fun() {
-    val input = input_7.lines().map { it.split(" ") }.map { listOf(it[1], it[7]) }
+    val dependencies = input_7.lines().map { it.split(" ") }.map { Pair(it[1], it[7]) }
 
-    val allSteps = input.flatten().distinct()
+    val allSteps = dependencies.flatMap { listOf(it.first, it.second) }.distinct()
     val completed = mutableListOf<String>()
-
-    fun canStart() = (allSteps - completed).filterNot { s ->
-        input.any { it[1] == s && !completed.contains(it[0]) }
-    }
-
-    while (completed.size < allSteps.size) {
-
-        val can = canStart().sorted()
-        completed.add(can.first())
-    }
-
-    completed.joinToString("").print()
-
     val running = mutableListOf<Pair<String, Int>>()
+
+    // Part 1
+    while (completed.size < allSteps.size) {
+        val canStart = (allSteps - completed).filterNot { s ->
+            dependencies.any { it.second == s && !completed.contains(it.first) }
+        }.sorted()
+        completed.add(canStart.first())
+    }
+    completed.joinToString("").print { "Part 1: the order of tasks is $it" }
+
     completed.clear()
     var clock = 0;
     val numWorkers = 5
     val offset = 60
-
-    fun canStart2() = (allSteps - completed - running.map { it.first }).filterNot { s ->
-        input.any { it[1] == s && !completed.contains(it[0]) }
-    }
 
     while (completed.size < allSteps.size) {
         val done = running.filter { it.second == clock }
         completed.addAll(done.map { it.first })
         running.removeAll(done)
 
-        val can = canStart2().sorted().take(numWorkers - running.size)
-        running.addAll(can.map { Pair(it, clock + offset + (it[0] - 64).toInt()) })
+        val canStart = (allSteps - completed - running.map { it.first }).filterNot { s ->
+            dependencies.any { it.second == s && !completed.contains(it.first) }
+        }.sorted()
 
-        running.print()
+        running.addAll(canStart.take(numWorkers - running.size).map { Pair(it, clock + offset + (it[0] - 64).toInt()) })
 
         clock++
     }
 
-    (clock - 1).print()
-
-
+    (clock - 1).print { "Part 2: it took $it seconds to complete all tasks" }
 
 }
 

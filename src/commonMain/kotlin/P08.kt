@@ -1,7 +1,6 @@
 val p08 = fun() {
-    val input = input_8.split(" ").map { it.toInt() }.asSequence()
 
-    val stream = input.iterator()
+    val stream = input_8.split(" ").map { it.toInt() }.asSequence().iterator()
 
     fun parseNode(): Node {
         val numChildren = stream.next()
@@ -11,9 +10,9 @@ val p08 = fun() {
         return Node(children, meta)
     }
 
-    val tree = parseNode()
-    tree.sumMeta().print()
-    tree.value().print()
+    val root = parseNode()
+    root.sumMeta().print()
+    root.value().print()
 
 }
 
@@ -21,7 +20,9 @@ class Node(val children: List<Node>, val metaData: List<Int>) {
 
     fun sumMeta(): Int = metaData.sum() + children.sumBy { it.sumMeta() }
 
-    fun value(): Int = if (children.isEmpty()) sumMeta() else {
+    fun value(): Int = if (children.isEmpty()) {
+        sumMeta()
+    } else {
         metaData.sumBy { if (children.size >= it) children[it - 1].value() else 0 }
     }
 
