@@ -1,6 +1,6 @@
 val p08 = fun() {
 
-    val stream = input_8.split(" ").map { it.toInt() }.asSequence().iterator()
+    val stream = input_8.split(" ").map { it.toInt() }.iterator()
 
     fun parseNode(): Node {
         val numChildren = stream.next()
