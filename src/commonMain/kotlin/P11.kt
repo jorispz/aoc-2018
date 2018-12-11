@@ -2,43 +2,58 @@
 // 2: 90,214,15
 
 const val serial = 1718
+const val gridSize = 300
 
 val p11 = fun() {
 
-    val grid = Array(300) { x ->
-        IntArray(300) { y ->
-            val rackId = (x + 1) + 10
-            (((rackId * (y + 1)) + serial) * rackId).let {
-                ((it / 100) % 10) - 5
-            }
+    val sat = summedAreaTable(gridSize) { x, y ->
+        val rackId = x + 10
+        (((rackId * y) + serial) * rackId).let {
+            ((it / 100) % 10) - 5
         }
     }
 
-    fun power(corner: Pair<Int, Int>, squareSize: Int) = (corner.first until corner.first + squareSize).sumBy { x ->
-        (corner.second until corner.second + squareSize).sumBy { y ->
-            grid[x - 1][y - 1]
-        }
-    }
-
-
-    fun maxPower(squareSize: Int): Triple<Pair<Int, Int>, Int, Int> {
-        val corners = (1..(301 - squareSize)).flatMap { x -> (1..(301 - squareSize)).map { y -> Pair(x, y) } }
-
-        val max = corners.associateWith {
-            power(it, squareSize)
-        }.maxBy { it.value }!!.toPair()
-        return Triple(max.first, squareSize, max.second)
-
-    }
-
-    (1..300).map { squareSize ->
-        maxPower(squareSize).also {
-            if (squareSize == 3) {
-                it.print { "Part 1: $it" }
-            }
-        }
+    (1..gridSize).map { size ->
+        val best = sat.bestSquare(size)
+        if (size == 3) println("Part 1: $best")
+        Triple(best.first, size, best.second)
     }.maxBy { it.third }.print { "Part 2: $it" }
 
 }
+
+fun summedAreaTable(gridSize: Int, f: (Int, Int) -> Int) =
+    Array(gridSize + 1) { IntArray(gridSize + 1) }.apply {
+        (1..gridSize).forEach { x -> this[x][1] = f(x, 1) + this[x - 1][1] }
+        (1..gridSize).forEach { y -> this[1][y] = f(1, y) + this[1][y - 1] }
+        (2..gridSize).forEach { x ->
+            (2..gridSize).forEach { y ->
+                this[x][y] = f(x, y) + this[x - 1][y] + this[x][y - 1] - this[x - 1][y - 1]
+            }
+        }
+    }
+
+fun Array<IntArray>.powerOfSquare(x: Int, y: Int, s: Int): Int {
+    val l = s - 1
+    return this[x - 1][y - 1] + this[x + l][y + l] - this[x - 1][y + l] - this[x + l][y - 1]
+}
+
+fun Array<IntArray>.bestSquare(size: Int): Pair<GridPoint, Int> {
+    val xs = (1..gridSize - size + 1).asSequence()
+
+    return xs.flatMap { x ->
+        xs.map { y ->
+            Pair(GridPoint(x, y), this.powerOfSquare(x, y, size))
+        }
+    }.maxBy { it.second }!!
+}
+
+fun Array<IntArray>.print(pad: Int = 3) {
+    val width = this.size
+    val height = this[0].size
+    (0 until height).forEach { y ->
+        println((0 until width).joinToString(" ") { x -> this[x][y].toString().padStart(pad) })
+    }
+}
+
 
 
