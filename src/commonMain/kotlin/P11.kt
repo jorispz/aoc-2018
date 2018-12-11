@@ -1,6 +1,8 @@
 // 1: 243,43
 // 2: 90,214,15
 
+// Uses https://en.wikipedia.org/wiki/Summed-area_table
+
 const val serial = 1718
 const val gridSize = 300
 
