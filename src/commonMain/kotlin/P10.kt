@@ -50,7 +50,7 @@ fun List<Particle>.draw() {
             if (this.any { it.x == _x && it.y == _y }) {
                 "#"
             } else {
-                "."
+                " "
             }
         }
     }.forEach { println(it) }
