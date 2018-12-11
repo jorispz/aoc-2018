@@ -13,11 +13,17 @@ val p11 = fun() {
         }
     }
 
-    (1..gridSize).map { size ->
-        val best = sat.bestSquare(size)
-        if (size == 3) println("Part 1: $best")
-        Triple(best.first, size, best.second)
-    }.maxBy { it.third }.print { "Part 2: $it" }
+    var best = Triple(0, 0, 0)
+    for (size in 1..gridSize) {
+        sat.bestSquare(size).also {
+            if (size == 3) println("Part 1: $it")
+
+            if (it.third > best.third) {
+                best = it
+            }
+        }
+    }
+    best.print { "Part 2: $it" }
 
 }
 
@@ -33,18 +39,22 @@ fun summedAreaTable(gridSize: Int, f: (Int, Int) -> Int) =
     }
 
 fun Array<IntArray>.powerOfSquare(x: Int, y: Int, s: Int): Int {
-    val l = s - 1
-    return this[x - 1][y - 1] + this[x + l][y + l] - this[x - 1][y + l] - this[x + l][y - 1]
+    return this[x - 1][y - 1] + this[x + (s - 1)][y + (s - 1)] - this[x - 1][y + (s - 1)] - this[x + (s - 1)][y - 1]
 }
 
-fun Array<IntArray>.bestSquare(size: Int): Pair<GridPoint, Int> {
-    val xs = (1..gridSize - size + 1).asSequence()
-
-    return xs.flatMap { x ->
-        xs.map { y ->
-            Pair(GridPoint(x, y), this.powerOfSquare(x, y, size))
+fun Array<IntArray>.bestSquare(size: Int): Triple<Int, Int, Int> {
+    var best = Triple(0, 0, 0)
+    for (x in 1..gridSize - size + 1) {
+        for (y in 1..gridSize - size + 1) {
+            powerOfSquare(x, y, size).also {
+                if (it > best.third) {
+                    best = Triple(x, y, it)
+                }
+            }
         }
-    }.maxBy { it.second }!!
+    }
+
+    return best
 }
 
 fun Array<IntArray>.print(pad: Int = 3) {
