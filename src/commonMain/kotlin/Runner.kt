@@ -13,11 +13,12 @@ object Puzzles {
         Puzzle(8) to p08,
         Puzzle(9) to p09,
         Puzzle(10) to p10,
-        Puzzle(11) to p11
+        Puzzle(11) to p11,
+        Puzzle(12) to p12
     )
 
     fun run(day: Int, part: Int? = null) {
-        puzzles.filter { it.key == Puzzle(day, part) }.values.single()()
+        puzzles[Puzzle(day, part)]!!()
     }
 
 }
