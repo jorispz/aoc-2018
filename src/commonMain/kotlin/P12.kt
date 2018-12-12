@@ -2,7 +2,7 @@
 // 2: 3150000000905
 val p12 = fun() {
 
-    val startingPots = input_12_initial.mapIndexed { i, c -> Pot(i.toLong(), c == '#') }
+    val startingPots = input_12_initial.mapIndexed { i, c -> Pot(i.toLong(), c == '#') }.draw()
     val rules = input_12_rules.lines().map { line ->
         val mask = line.substring(0..4).map { it == '#' }
         val result = line.last() == '#'
@@ -62,8 +62,8 @@ fun List<Pot>.compress(): List<Pot> {
     return this.subList(startIndex, endIndex + 1)
 }
 
-fun List<Boolean>.draw(): List<Boolean> {
-    println(joinToString("") { if (it) "#" else "." })
+fun List<Pot>.draw(): List<Pot> {
+    println(joinToString("") { if (it.hasPlant) "\ud83c\udf32" else "." })
     return this
 }
 
