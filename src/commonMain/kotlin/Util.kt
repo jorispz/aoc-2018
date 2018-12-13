@@ -7,11 +7,21 @@ fun <T> List<T>.without(element: T): List<T> = this.filter { it != element }
 fun <T> List<T>.replaceElementAt(index: Int, newValue: T): List<T> =
     this.toMutableList().apply { this[index] = newValue }
 
+fun <T> Collection<T>.whenNotEmpty(block: (Collection<T>) -> Unit) {
+    if (this.isNotEmpty()) {
+        block(this)
+    }
+}
+
 fun <T : Comparable<T>> Iterable<T>.maxWithIndex(): IndexedValue<T>? = this.withIndex().maxBy { it.value }
 
 operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>) = Pair(this.first + other.first, this.second + other.second)
 operator fun Triple<Int, Int, Int>.plus(other: Triple<Int, Int, Int>) =
     Triple(this.first + other.first, this.second + other.second, this.third + other.third)
+
+enum class Turn {
+    LEFT, STRAIGHT, RIGHT, REVERSE
+}
 
 enum class Heading {
     N, S, E, W;
