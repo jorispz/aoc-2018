@@ -50,10 +50,9 @@ class World(input: List<String>) {
             if (!cart.crashed) {
                 cart.move(map)
                 carts.without(cart).filter { other -> !other.crashed && other.x == cart.x && other.y == cart.y }
-                    .whenNotEmpty { crashedInto ->
-                        (crashedInto + cart).forEach {
-                            it.crashed = true
-                        }
+                    .onEach { it.crashed = true }
+                    .whenNotEmpty {
+                        cart.crashed = true
                         if (firstCrash) {
                             println("First crash at ${cart.x},${cart.y}")
                             firstCrash = false
