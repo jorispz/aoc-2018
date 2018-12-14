@@ -23,7 +23,7 @@ class Node(val children: List<Node>, val metaData: List<Int>) {
     fun value(): Int = if (children.isEmpty()) {
         sumMeta()
     } else {
-        metaData.sumBy { if (children.size >= it) children[it - 1].value() else 0 }
+        metaData.filter { it != 0 }.sumBy { if (children.size >= it) children[it - 1].value() else 0 }
     }
 
 }
