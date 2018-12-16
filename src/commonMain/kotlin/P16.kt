@@ -58,23 +58,23 @@ fun Operation.matches(sample: Sample): Boolean {
     return register == sample.after
 }
 
-val operations = listOf(
-    { r: Register, a: Int, b: Int, c: Int -> r[c] = r[a] + r[b] },              //
-    { r: Register, a: Int, b: Int, c: Int -> r[c] = r[a] + b },
-    { r: Register, a: Int, b: Int, c: Int -> r[c] = r[a] * r[b] },
-    { r: Register, a: Int, b: Int, c: Int -> r[c] = r[a] * b },
-    { r: Register, a: Int, b: Int, c: Int -> r[c] = r[a] and r[b] },
-    { r: Register, a: Int, b: Int, c: Int -> r[c] = r[a] and b },
-    { r: Register, a: Int, b: Int, c: Int -> r[c] = r[a] or r[b] },
-    { r: Register, a: Int, b: Int, c: Int -> r[c] = r[a] or b },
-    { r: Register, a: Int, _: Int, c: Int -> r[c] = r[a] },
-    { r: Register, a: Int, _: Int, c: Int -> r[c] = a },
-    { r: Register, a: Int, b: Int, c: Int -> r[c] = if (a > r[b]) 1 else 0 },
-    { r: Register, a: Int, b: Int, c: Int -> r[c] = if (r[a] > b) 1 else 0 },
-    { r: Register, a: Int, b: Int, c: Int -> r[c] = if (r[a] > r[b]) 1 else 0 },
-    { r: Register, a: Int, b: Int, c: Int -> r[c] = if (a == r[b]) 1 else 0 },
-    { r: Register, a: Int, b: Int, c: Int -> r[c] = if (r[a] == b) 1 else 0 },
-    { r: Register, a: Int, b: Int, c: Int -> r[c] = if (r[a] == r[b]) 1 else 0 }
+val operations = listOf<Operation>(
+    { r, a, b, c -> r[c] = r[a] + r[b] },              //
+    { r, a, b, c -> r[c] = r[a] + b },
+    { r, a, b, c -> r[c] = r[a] * r[b] },
+    { r, a, b, c -> r[c] = r[a] * b },
+    { r, a, b, c -> r[c] = r[a] and r[b] },
+    { r, a, b, c -> r[c] = r[a] and b },
+    { r, a, b, c -> r[c] = r[a] or r[b] },
+    { r, a, b, c -> r[c] = r[a] or b },
+    { r, a, _, c -> r[c] = r[a] },
+    { r, a, _, c -> r[c] = a },
+    { r, a, b, c -> r[c] = if (a > r[b]) 1 else 0 },
+    { r, a, b, c -> r[c] = if (r[a] > b) 1 else 0 },
+    { r, a, b, c -> r[c] = if (r[a] > r[b]) 1 else 0 },
+    { r, a, b, c -> r[c] = if (a == r[b]) 1 else 0 },
+    { r, a, b, c -> r[c] = if (r[a] == b) 1 else 0 },
+    { r, a, b, c -> r[c] = if (r[a] == r[b]) 1 else 0 }
 )
 
 
