@@ -1,8 +1,17 @@
 import kotlin.math.abs
 
+const val ELF_POWER = 19
+
 val p15 = fun() {
 
+//    val input = input_15_test_3 // 47 x 590 = 27730
+//    val input = input_15_test_4 // 37 x 982 = 36334
+//    val input = input_15_test_5 // 35 x 793 = 27755
+//    val input = input_15_test_6 // 46 x 859 = 39514
+//    val input = input_15_test_7 // 54 * 536 = 28944
+//    val input = input_15_test_8 // 20 * 937 = 18740
     val input = input_15
+
     val arena = Arena(input.lines().filterNot { it.isEmpty() })
 
     arena.run()
@@ -26,7 +35,7 @@ enum class ActorType {
 class Actor(position: Position, val type: ActorType, val arena: Arena) {
     var position = position
         private set
-    val strength: Int = 3
+    val strength: Int = if (type == ActorType.ELF) ELF_POWER else 3
     var hitPoints: Int = 200
         private set
     val alive: Boolean
@@ -48,28 +57,16 @@ class Actor(position: Position, val type: ActorType, val arena: Arena) {
 
 
     fun act() {
-        if (!alive) return
+        if (!alive || arena.battleOver()) return
 
         val enemies = arena.enemiesFor(this)
         var adjacentEnemies = enemies.filter { it.adjacentTo(this) }
 
         if (adjacentEnemies.isEmpty()) {
-            val poi = enemies
-                .flatMap { arena.openPositionsNextTo(it) }
-                .distinct()
-                .associateWith { arena.shortestPaths(position, it) }
-                .filterValues { it.isNotEmpty() }
+            val paths = arena.shortestPathsToEnemies(this)
 
-            if (poi.values.any { it.isNotEmpty() }) {
-                val shortestPathLength = poi.values.minBy { it.first().size }!!.first().size
-                val target = poi.filter { it.value.first().size == shortestPathLength }.keys.sortedWith(
-                    compareBy(
-                        Position::y,
-                        Position::x
-                    )
-                ).first()
-
-                val next = poi[target]!!.map { it.first() }.sortedWith(
+            if (paths.isNotEmpty()) {
+                val next = paths.map { it.first() }.sortedWith(
                     compareBy(
                         Position::y,
                         Position::x
@@ -145,6 +142,7 @@ class Arena(input: List<String>) {
 
     fun draw() {
         println()
+        println("Rounds completed: ${roundsCompleted}")
         survivors.forEach { println(it) }
         val sb = StringBuilder((height + 1) * width)
         sb.append("\n")
@@ -169,6 +167,61 @@ class Arena(input: List<String>) {
         return actor.position.nextTo()
             .filter { p -> p in emptySpaces && survivors.without(actor).none { it.position == p } }
     }
+
+    fun shortestPathsToEnemies(actor: Actor): List<List<Position>> {
+        val from = actor.position
+        val enemies = enemiesFor(actor)
+
+        val vertices = emptySpaces.filterNot { p -> survivors.any { it.position == p } }
+            .map { Vertex(it, Int.MAX_VALUE, mutableSetOf()) }.toMutableSet()
+        vertices.add(Vertex(from, 0, mutableSetOf()))
+        val shortestPathSet = mutableSetOf<Vertex>()
+        val targets = vertices.filter { v -> v.position in enemies.flatMap { openPositionsNextTo(it) } }.toSet()
+
+        var done = false
+        var dist = 0
+        while (!done) {
+            val nextGen = vertices.filter { it.dist == dist }
+            if (nextGen.isEmpty()) {
+                done = true
+            } else {
+                vertices.removeAll(nextGen)
+                nextGen.forEach { current ->
+                    vertices.filter { it.position.adjacentTo(current.position) }.forEach { vertex ->
+                        val newDist = current.dist + 1
+                        if (newDist < vertex.dist) {
+                            vertex.dist = newDist
+                            vertex.parents.clear()
+                            vertex.parents.add(current)
+                        } else if (newDist == vertex.dist) {
+                            vertex.parents.add(current)
+                        }
+                    }
+                    shortestPathSet.add(current)
+                }
+                done = vertices.isEmpty() || targets.any { it in shortestPathSet }
+                if (!done) dist++
+
+            }
+        }
+
+        val target =
+            targets.filter { it in shortestPathSet }.sortedWith(compareBy({ it.position.y }, { it.position.x }))
+                .firstOrNull()
+
+        if (target == null) {
+            return emptyList()
+        } else {
+            var result = listOf(listOf(target))
+            while (result.first().last().parents.isNotEmpty()) {
+                result = result.flatMap { path -> path.last().parents.map { parent -> path + parent } }
+            }
+            return result.map { it.map { it.position }.reversed() }.filter { it.first() == from }.map { it.drop(1) }
+        }
+
+
+    }
+
 
     fun shortestPaths(from: Position, to: Position): List<List<Position>> {
 
@@ -219,22 +272,33 @@ class Arena(input: List<String>) {
     fun run() {
         draw()
         while (!battleOver()) {
-            survivors.sortedWith(
+            val actors = survivors.sortedWith(
                 compareBy(
                     { it.position.y },
                     { it.position.x })
-            ).forEach {
-                it.act()
+            )
+
+            for (actor in actors.dropLast(1)) {
+                actor.act()
             }
+            if (!battleOver()) {
+                actors.last().act()
+                if (battleOver()) {
+                    roundsCompleted++
+                }
+            }
+
             if (!battleOver()) {
                 roundsCompleted++
             }
 
             draw()
         }
-        println("Done in $roundsCompleted rounds")
+
+        println("Done in $roundsCompleted rounds with elf power $ELF_POWER")
         println("Total number of hitpoints: ${survivors.sumBy { it.hitPoints }}")
-        println("Part 1: ${roundsCompleted * survivors.sumBy { it.hitPoints }}")
+        println("Points: ${roundsCompleted * survivors.sumBy { it.hitPoints }}")
+        println("Dead elves: ${actors.filter { it.type == ActorType.ELF && !it.alive }.count()}")
     }
 
 
@@ -294,6 +358,38 @@ val input_15_test_5 = """
 #G..#.#
 #...E.#
 #######
+"""
+
+val input_15_test_6 = """
+#######
+#E..EG#
+#.#G.E#
+#E.##E#
+#G..#.#
+#..E#.#
+#######
+"""
+
+val input_15_test_7 = """
+#######
+#.E...#
+#.#..G#
+#.###.#
+#E#G#G#
+#...#G#
+#######
+"""
+
+val input_15_test_8 = """
+#########
+#G......#
+#.E.#...#
+#..##..G#
+#...##..#
+#...#...#
+#.G...G.#
+#.....G.#
+#########
 """
 
 val input_15 = """
