@@ -17,7 +17,8 @@ object Puzzles {
         Puzzle(12) to p12,
         Puzzle(13) to p13,
         Puzzle(14) to p14,
-        Puzzle(15) to p15
+        Puzzle(15) to p15,
+        Puzzle(16) to p16
     )
 
     fun run(day: Int, part: Int? = null) {
