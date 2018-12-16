@@ -1,5 +1,8 @@
 import kotlin.math.abs
 
+// Part 1: 229798 (elf power 3)
+// Part 2: 52972 (elf power 19)
+
 const val ELF_POWER = 19
 
 val p15 = fun() {
@@ -20,12 +23,13 @@ val p15 = fun() {
 
 data class Position(val x: Int, val y: Int) {
 
-    fun nextTo(): List<Position> =
+    fun adjacents(): List<Position> =
         listOf(Position(x - 1, y), Position(x, y - 1), Position(x + 1, y), Position(x, y + 1))
 
-    fun distanceTo(other: Position) = abs(x - other.x) + abs((y - other.y))
+    private fun distanceTo(other: Position) = abs(x - other.x) + abs((y - other.y))
 
     fun adjacentTo(other: Position) = distanceTo(other) == 1
+
 }
 
 enum class ActorType {
@@ -42,18 +46,18 @@ class Actor(position: Position, val type: ActorType, val arena: Arena) {
         get() = (hitPoints > 0)
 
 
-    fun takeDamage(amount: Int) {
+    private fun takeDamage(amount: Int) {
         hitPoints = (hitPoints - amount).coerceAtLeast(0)
     }
 
-    fun attack(enemy: Actor) = enemy.takeDamage(strength).also { println("$this attacks $enemy") }
+    private fun attack(enemy: Actor) = enemy.takeDamage(strength).also { println("$this attacks $enemy") }
 
-    fun moveTo(new: Position) {
+    private fun moveTo(new: Position) {
         println("$this moves to $new")
         position = new
     }
 
-    fun adjacentTo(other: Actor) = this.position.adjacentTo(other.position)
+    private fun adjacentTo(other: Actor) = this.position.adjacentTo(other.position)
 
 
     fun act() {
@@ -63,7 +67,7 @@ class Actor(position: Position, val type: ActorType, val arena: Arena) {
         var adjacentEnemies = enemies.filter { it.adjacentTo(this) }
 
         if (adjacentEnemies.isEmpty()) {
-            val paths = arena.shortestPathsToEnemies(this)
+            val paths = arena.shortestPathsToNearestEnemy(this, enemies)
 
             if (paths.isNotEmpty()) {
                 val next = paths.map { it.first() }.sortedWith(
@@ -163,110 +167,57 @@ class Arena(input: List<String>) {
     fun enemiesFor(actor: Actor) = survivors.filter { it.type != actor.type }
 
 
-    fun openPositionsNextTo(actor: Actor): List<Position> {
-        return actor.position.nextTo()
+    private fun openPositionsInRange(actor: Actor): List<Position> {
+        return actor.position.adjacents()
             .filter { p -> p in emptySpaces && survivors.without(actor).none { it.position == p } }
     }
 
-    fun shortestPathsToEnemies(actor: Actor): List<List<Position>> {
+    fun shortestPathsToNearestEnemy(actor: Actor, enemies: List<Actor>): List<List<Position>> {
         val from = actor.position
-        val enemies = enemiesFor(actor)
+        val targetPositions = enemies.flatMap { openPositionsInRange(it) }.distinct()
 
-        val vertices = emptySpaces.filterNot { p -> survivors.any { it.position == p } }
-            .map { Vertex(it, Int.MAX_VALUE, mutableSetOf()) }.toMutableSet()
-        vertices.add(Vertex(from, 0, mutableSetOf()))
-        val shortestPathSet = mutableSetOf<Vertex>()
-        val targets = vertices.filter { v -> v.position in enemies.flatMap { openPositionsNextTo(it) } }.toSet()
+        val unvisited = emptySpaces.minus(survivors.map { it.position })
+            .map { Vertex(it, Int.MAX_VALUE, mutableListOf()) }
+            .plus(Vertex(from, 0, mutableListOf()))
+            .toMutableList()
 
-        var done = false
-        var dist = 0
-        while (!done) {
-            val nextGen = vertices.filter { it.dist == dist }
-            if (nextGen.isEmpty()) {
-                done = true
-            } else {
-                vertices.removeAll(nextGen)
-                nextGen.forEach { current ->
-                    vertices.filter { it.position.adjacentTo(current.position) }.forEach { vertex ->
-                        val newDist = current.dist + 1
-                        if (newDist < vertex.dist) {
-                            vertex.dist = newDist
-                            vertex.parents.clear()
-                            vertex.parents.add(current)
-                        } else if (newDist == vertex.dist) {
-                            vertex.parents.add(current)
-                        }
-                    }
-                    shortestPathSet.add(current)
-                }
-                done = vertices.isEmpty() || targets.any { it in shortestPathSet }
-                if (!done) dist++
-
-            }
-        }
-
-        val target =
-            targets.filter { it in shortestPathSet }.sortedWith(compareBy({ it.position.y }, { it.position.x }))
-                .firstOrNull()
-
-        if (target == null) {
-            return emptyList()
-        } else {
-            var result = listOf(listOf(target))
-            while (result.first().last().parents.isNotEmpty()) {
-                result = result.flatMap { path -> path.last().parents.map { parent -> path + parent } }
-            }
-            return result.map { it.map { it.position }.reversed() }.filter { it.first() == from }.map { it.drop(1) }
-        }
-
-
-    }
-
-
-    fun shortestPaths(from: Position, to: Position): List<List<Position>> {
-
-        val vertices = emptySpaces.filterNot { p -> survivors.any { it.position == p } }
-            .map { Vertex(it, Int.MAX_VALUE, mutableSetOf()) }.toMutableSet()
-        vertices.add(Vertex(from, 0, mutableSetOf()))
-
-        // Early return if either to or from are not in the set of vertices
-        if (!vertices.any { it.position == to } || !vertices.any { it.position == from }) {
-            return emptyList()
-        }
-
-        vertices.single { it.position == from }.dist = 0
-        val shortestPathSet = mutableSetOf<Vertex>()
+        val visited = mutableListOf<Vertex>()
+        val targets = unvisited.filter { v -> v.position in targetPositions }
 
         var done = false
+        var currentDist = 0
         while (!done) {
-            val current = vertices.minBy { it.dist }!!
-            if (current.dist == Int.MAX_VALUE) {
+
+            val nextToVisit = unvisited.filter { it.dist == currentDist }
+
+            if (nextToVisit.isEmpty()) {
                 done = true
             } else {
-                vertices.remove(current)
-                done = vertices.isEmpty()
-                vertices.filter { it.position.adjacentTo(current.position) }.forEach { vertex ->
-                    val newDist = current.dist + 1
-                    if (newDist < vertex.dist) {
-                        vertex.dist = newDist
-                        vertex.parents.clear()
-                        vertex.parents.add(current)
-                    } else if (newDist == vertex.dist) {
+                unvisited.removeAll(nextToVisit)
+                nextToVisit.forEach { current ->
+                    unvisited.filter { it.position.adjacentTo(current.position) }.forEach { vertex ->
+                        vertex.dist = current.dist + 1
                         vertex.parents.add(current)
                     }
+                    visited.add(current)
                 }
-                shortestPathSet.add(current)
+                done = unvisited.isEmpty() || targets.any { it in visited }
             }
+            currentDist++
         }
 
-        val target = shortestPathSet.singleOrNull { it.position == to } ?: return emptyList()
+        val selectedTarget = targets
+            .filter { it in visited }
+            .sortedWith(compareBy({ it.position.y }, { it.position.x }))
+            .firstOrNull()
+            ?: return emptyList()
 
-        var result = listOf(listOf(target))
-        while (result.first().last().parents.isNotEmpty()) {
-            result = result.flatMap { path -> path.last().parents.map { parent -> path + parent } }
+        var paths = listOf(listOf(selectedTarget))
+        while (paths.first().last().parents.isNotEmpty()) {
+            paths = paths.flatMap { path -> path.last().parents.map { parent -> path + parent } }
         }
+        return paths.map { it.map { it.position }.reversed() }.filter { it.first() == from }.map { it.drop(1) }
 
-        return result.map { it.map { it.position }.reversed() }.filter { it.first() == from }.map { it.drop(1) }
     }
 
     fun run() {
@@ -305,7 +256,7 @@ class Arena(input: List<String>) {
 }
 
 operator fun Array<BooleanArray>.get(position: Position): Boolean = this[position.x][position.y]
-class Vertex(val position: Position, var dist: Int, val parents: MutableSet<Vertex>)
+class Vertex(val position: Position, var dist: Int, val parents: MutableList<Vertex>)
 
 
 val input_15_test_1 = """
