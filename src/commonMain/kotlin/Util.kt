@@ -1,3 +1,5 @@
+import kotlin.math.abs
+
 fun <T> T.print(msg: (T) -> Any? = { it }): T = this.apply { println(msg(this)) }
 
 
@@ -14,6 +16,32 @@ fun <T> Collection<T>.whenNotEmpty(block: (Collection<T>) -> Unit) {
 }
 
 fun <T : Comparable<T>> Iterable<T>.maxWithIndex(): IndexedValue<T>? = this.withIndex().maxBy { it.value }
+
+fun <T> MutableSet<T>.takeFirst(): T = this.first().also { remove(it) }
+
+data class Position(val x: Int, val y: Int) {
+
+    val left by lazy {
+        Position(x - 1, y)
+    }
+    val right by lazy {
+        Position(x, y + 1)
+    }
+    val up by lazy {
+        Position(x, y - 1)
+    }
+    val down by lazy {
+        Position(x, y + 1)
+    }
+
+    fun adjacents(): List<Position> = listOf(left, up, right, down)
+
+    private fun distanceTo(other: Position) = abs(x - other.x) + abs((y - other.y))
+
+    fun adjacentTo(other: Position) = distanceTo(other) == 1
+
+
+}
 
 operator fun Pair<Int, Int>.plus(other: Pair<Int, Int>) = Pair(this.first + other.first, this.second + other.second)
 operator fun Triple<Int, Int, Int>.plus(other: Triple<Int, Int, Int>) =
