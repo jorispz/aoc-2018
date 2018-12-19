@@ -49,8 +49,8 @@ val p16 = fun() {
 data class Instruction(val opCode: Int, val a: Int, val b: Int, val c: Int)
 data class Sample(val before: List<Int>, val instruction: Instruction, val after: List<Int>)
 
-typealias Register = MutableList<Int>
-typealias Operation = (Register, Int, Int, Int) -> Unit
+typealias Registers = MutableList<Int>
+typealias Operation = (Registers, Int, Int, Int) -> Unit
 
 fun Operation.matches(sample: Sample): Boolean {
     val register = sample.before.toMutableList()
