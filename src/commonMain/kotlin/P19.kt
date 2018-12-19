@@ -1,3 +1,5 @@
+// 1:     1848
+// 2: 22157688
 val p19 = fun() {
     val input = input_19.lines()
     val boundRegister = input.first().split(" ")[1].toInt()
@@ -16,7 +18,7 @@ val p19 = fun() {
         pointer = registers[boundRegister] + 1
     } while (pointer in 0 until program.size)
 
-    registers[0].print()
+    registers[0].print { "Part 1: $it" }
 
     // This is the kotlin version of what happens when you
     // run the program with a = 1
@@ -27,7 +29,7 @@ val p19 = fun() {
             a += d
         }
     }
-    a.print()
+    a.print { "Part 2: sum of all divisors of $b is $it" }
 
 
 }
