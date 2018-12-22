@@ -18,6 +18,7 @@ fun <T> Collection<T>.whenNotEmpty(block: (Collection<T>) -> Unit) {
 fun <T : Comparable<T>> Iterable<T>.maxWithIndex(): IndexedValue<T>? = this.withIndex().maxBy { it.value }
 
 fun <T> MutableSet<T>.takeFirst(): T = this.first().also { remove(it) }
+//fun <T> MutableList<T>.takeFirst(): T = this.first().also { removeAt(0) }
 
 data class Position(val x: Int, val y: Int) {
 
